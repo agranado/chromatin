@@ -21,12 +21,18 @@ hist(log(end(ranges(patski))-start(ranges(patski))),
 #Most regions seem to be less than 1kb
 #median = 669
 
+#reformat as data.frame to include numeric score values 
+patski.df = data.frame(chr = seqnames(patski), start = start(ranges(patski)), 
+                       end= end(ranges(patski)), score = as.numeric( patski$name) )
+#remake genomic ranges object 
+patski.gr=makeGRangesFromDataFrame(patski.df,ignore.strand = T,
+                                    seqnames.field = "chr",keep.extra.columns = T)
 
 #Let's partition the genome into equal length long regions 
 #We can use a custom function
 #input argument is a list of bed objects
 all.bed.files  = list()
-all.bed.files[[1]] = patski #only element in the list
+all.bed.files[[1]] = patski.gr #only element in the list
 
 #Load the function : 
 source("../mouseATAC/grFunctions.R")
