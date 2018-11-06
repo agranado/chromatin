@@ -9,7 +9,7 @@ library(rtracklayer)
 library(IdeoViz)
 library(GenomicRanges)
 library(readxl)
-setwd("/home/alejandrog/MEGA/Caltech/epimemoir/chromatin") #GIT repository
+#setwd("/home/alejandrog/MEGA/Caltech/epimemoir/chromatin") #GIT repository
 patski= import.bed("patskiWT.allelicATAC.dScore.minCov_5.bedgraph.gz")
 
 
@@ -45,9 +45,9 @@ source("grFunctions.R")
 #partition the genome in windows to look for density of atac peaks
 window.size=5000
 all.segmented.gr<-segment_genome(all.bed.files,window.size)
-
+patski.gr.unique = all.segmented.gr[[1]] #replace the object with the partitioned genome.
 #let's take only the ATAC peaks from the X chromosome
-patski.X = patski.gr.unique[ seqnames(patski.gr.unique)=="chrX" ]
+patski.X.segmented = patski.gr.unique[ seqnames(patski.gr.unique)=="chrX" ]
 #WE can se how many sites we for a give score
 # There are 1605 peaks in the X chromose of which 204 have score 0.5 (maximum)
 #Sushi library
