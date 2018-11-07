@@ -95,6 +95,11 @@ promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.pro
 
 
 atac.promoters = overlap_ATAC_ranges( promoters.df, raw.patski.x )
+#this promoters have UC ID which is weird, we can make a conversion table to get gene symbols and mrnaID
+#> mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -D mm10 -e 'select kgID,mRNA,geneSymbol from kgXref' | sed "s/'/\'/;s/\t/,/g;s/^//;s/$//;s/\n//g" > mm10_geneSymbols.txt
+#then read (needs a couple of manuall edits cause some entries have multiple names)
+gene.ids=read.table("mm10_geneSymbols.txt",sep=",",header=T)
+
 
 patski.top.regions=patski.open.gr[order(patski.open.gr$value, decreasing=T),]
 #coord.genes.x  contains all the geneID for each region in the genome (annotated as per mm10)
