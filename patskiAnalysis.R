@@ -75,6 +75,9 @@ patski.open.gr<-makeGRangesFromDataFrame(new.regions,ignore.strand = T,seqnames.
 # # # # # # # # #
  # # # # # # # # #
 ### FIND GENES BASED ON REGIONS
+
+# https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf
+
 source("mus.musculusX.R")
 #order by score
 coord.promoters.x = promoters(genes(TxDb.Mmusculus.UCSC.mm10.knownGene),upstream=2000,downstream=400)
