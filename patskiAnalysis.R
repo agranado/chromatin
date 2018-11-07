@@ -94,7 +94,11 @@ promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.pro
   raw.patski.x = raw.patski[seqnames(raw.patski)=="chrX",] #only genes from chr X
 
 
-
+atac.promoters = overlap_ATAC_ranges( promoters.df, raw.patski.x )
 
 patski.top.regions=patski.open.gr[order(patski.open.gr$value, decreasing=T),]
 #coord.genes.x  contains all the geneID for each region in the genome (annotated as per mm10)
+
+
+
+tx_seqs1<-extractTranscriptSeqs(Mmusculus,TxDb.Mmusculus.UCSC.mm10.knownGene,use.names = T)
