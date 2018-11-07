@@ -60,3 +60,38 @@ plotBedgraph(x,chrom = "chrX",chromstart = min(x$start),chromend = max(x$end))
 labelgenome(chrom,chromstart,chromend,n=4,scale="Mb")
 mtext("ATAC d-score",side=2,line=1.75,cex=1,font=2)
 axis(side=2,las=2,tcl=.2)
+
+
+
+#data frame can be filtered by value, in this case a high score reprensents the regions we want to keep:
+score.threshold = 0.5
+new.regions<-x[x$value>score.threshold,]
+#Make a GenomicRanges object
+patski.open.gr<-makeGRangesFromDataFrame(new.regions,ignore.strand = T,seqnames.field = "chrom",keep.extra.columns = T)
+
+
+# # # # # # # # #
+
+# # # # # # # # #
+ # # # # # # # # #
+### FIND GENES BASED ON REGIONS
+source("mus.musculusX.R")
+#order by score
+coord.promoters.x = promoters(genes(TxDb.Mmusculus.UCSC.mm10.knownGene),upstream=2000,downstream=400)
+coord.genes.x = genes(TxDb.Mmusculus.UCSC.mm10.knownGene)
+
+#make a data frame from the promoters GR object (keeping all fields)
+promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.promoters.x),
+                          end=end(coord.promoters.x),tx_id=coord.promoters.x$tx_id,
+                          tx_name=coord.promoters.x$tx_name)
+
+#alternative approach :
+  #for each promoter, look for overlapping ATAC peaks /scores
+  raw.patski = all.bed.files[[1]] #extract the patksi ATAC data unlisted (basically the original data with no duplicates)
+  raw.patski.x = raw.patski[seqnames(raw.patski)=="chrX",] #only genes from chr X
+
+
+
+
+patski.top.regions=patski.open.gr[order(patski.open.gr$value, decreasing=T),]
+#coord.genes.x  contains all the geneID for each region in the genome (annotated as per mm10)
