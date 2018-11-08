@@ -80,7 +80,7 @@ patski.open.gr<-makeGRangesFromDataFrame(new.regions,ignore.strand = T,seqnames.
 
 source("mus.musculusX.R")
 #order by score
-coord.promoters.x = promoters(genes(TxDb.Mmusculus.UCSC.mm10.knownGene),upstream=2000,downstream=400)
+coord.promoters.x = promoters(TxDb.Mmusculus.UCSC.mm10.knownGene,upstream=2000,downstream=0)
 coord.genes.x = genes(TxDb.Mmusculus.UCSC.mm10.knownGene)
 
 #make a data frame from the promoters GR object (keeping all fields)
@@ -92,17 +92,14 @@ promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.pro
   #for each promoter, look for overlapping ATAC peaks /scores
   raw.patski = all.bed.files[[1]] #extract the patksi ATAC data unlisted (basically the original data with no duplicates)
   raw.patski.x = raw.patski[seqnames(raw.patski)=="chrX",] #only genes from chr X
-
+  high.patski.x=raw.patski.x[raw.patski.x$score>0.45]
+  summary(width(high.patski.x)) # what's the average length of the ATAC peaks in patski data
 
 atac.promoters = overlap_ATAC_ranges( promoters.df, raw.patski.x )
 #this promoters have UC ID which is weird, we can make a conversion table to get gene symbols and mrnaID
 #> mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -D mm10 -e 'select kgID,mRNA,geneSymbol from kgXref' | sed "s/'/\'/;s/\t/,/g;s/^//;s/$//;s/\n//g" > mm10_geneSymbols.txt
 #then read (needs a couple of manuall edits cause some entries have multiple names)
 gene.ids=read.table("mm10_geneSymbols.txt",sep=",",header=T)
-
-
-patski.top.regions=patski.open.gr[order(patski.open.gr$value, decreasing=T),]
-#coord.genes.x  contains all the geneID for each region in the genome (annotated as per mm10)
 
 
 

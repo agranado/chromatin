@@ -155,17 +155,20 @@ overlap_ATAC_ranges<-function(target.regions,ATACpeaks){
   promoters.df = target.regions
   promoter.score = array(0,dim(promoters.df)[1])
   promoter.peaks = array(0,dim(promoters.df)[1])
+  promoter.mean = array(0,dim(promoters.df)[1])
 
   for(i in 1:dim(promoters.df)[1]){
     promoter.peaks[i] = sum( start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end)
     promoter.score[i] = sum(raw.patski.x$score[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end])
+    promoter.mean[i] =  mean(raw.patski.x$score[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end])
   }
   promoters.df$score = promoter.score
   promoters.df$peaks = promoter.peaks
+  promoters.df$mean  = promoter.mean
 
 #NEW data.frame for all promoters with 2 new fields:
 #  score:  (sum of individual scores for peaks within the promoter)
-#  peaks:  number of peaks ATAC peaks found within the region 
+#  peaks:  number of peaks ATAC peaks found within the region
   atac.promoters<-promoters.df[promoters.df$peaks>0,]
   atac.promoters<-atac.promoters[order(atac.promoters$score,decreasing=T),]
   return(atac.promoters)
