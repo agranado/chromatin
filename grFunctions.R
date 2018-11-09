@@ -147,6 +147,12 @@ segment_genome<-function(all.atac,window.size){
 
 
 }
+#reverse complement for ORF on the negative strand
+rc <- function(nucSeq){
+  #return(stri_reverse(chartr("acgtACGT", "tgcaTGCA", nucSeq)))
+  return(stri_reverse(nucSeq))
+}
+
 #this function takes annotated promoters from UCSD browser and then looks for peaks (ATAC in this case) within the promoter regions.
 #target.regions is a dataframe with start end attributes
 #ATAC peaks is a genomic region with start, end and score
@@ -156,15 +162,46 @@ overlap_ATAC_ranges<-function(target.regions,ATACpeaks){
   promoter.score = array(0,dim(promoters.df)[1])
   promoter.peaks = array(0,dim(promoters.df)[1])
   promoter.mean = array(0,dim(promoters.df)[1])
+  promoter.peaks.location = array(0,dim(promoters.df)[1])
 
   for(i in 1:dim(promoters.df)[1]){
     promoter.peaks[i] = sum( start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end)
     promoter.score[i] = sum(raw.patski.x$score[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end])
     promoter.mean[i] =  mean(raw.patski.x$score[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end])
+
+
+    #FIND location of ATAC peaks and convert the location relative to the start of the sequnece
+    #ALSO reverse the sequence if it is on the negative strand (and fix the location relative to the END!)
+    s1=start(raw.patski.x)[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end]
+    s2=end(raw.patski.x)[start(raw.patski.x)>=promoters.df[i,]$start & end(raw.patski.x)<=promoters.df[i,]$end]
+    location =""
+    if(length(s1)>0){
+        ### FIX location of the peaks
+        if(promoters.df[i,]$strand=="+"){
+        s1= s1-promoters.df[i,]$start
+        s2 = s2-promoters.df[i,]$start
+      }else { #promoter is in the reverse strand
+        s1_ = promoters.df[i,]$end - s2
+        s2 = promoters.df[i,]$end - s1
+        s1=  s1_
+      }
+
+
+        j=1;while(j <= length(s1)){
+          location=paste(location,toString(s1[j]),",",toString(s2[j]),";",sep="")
+          j=j+1
+        }
+    }
+
+
+
+    promoter.peaks.location[i] = location
+
   }
-  promoters.df$score = promoter.score
-  promoters.df$peaks = promoter.peaks
-  promoters.df$mean  = promoter.mean
+  promoters.df$sum.score = promoter.score
+  promoters.df$n.peaks = promoter.peaks
+  promoters.df$mean.score  = promoter.mean
+  promoters.df$peaks.location = promoter.peaks.location
 
 #NEW data.frame for all promoters with 2 new fields:
 #  score:  (sum of individual scores for peaks within the promoter)

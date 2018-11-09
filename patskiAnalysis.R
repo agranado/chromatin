@@ -85,7 +85,7 @@ coord.genes.x = genes(TxDb.Mmusculus.UCSC.mm10.knownGene)
 
 #make a data frame from the promoters GR object (keeping all fields)
 promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.promoters.x),
-                          end=end(coord.promoters.x),tx_id=coord.promoters.x$tx_id,
+                          end=end(coord.promoters.x),strand =strand(coord.promoters.x) ,tx_id=coord.promoters.x$tx_id,
                           tx_name=coord.promoters.x$tx_name)
 
 #alternative approach :
@@ -95,12 +95,25 @@ promoters.df<-data.frame(chrom=seqnames(coord.promoters.x),start=start(coord.pro
   high.patski.x=raw.patski.x[raw.patski.x$score>0.45]
   summary(width(high.patski.x)) # what's the average length of the ATAC peaks in patski data
 
-atac.promoters = overlap_ATAC_ranges( promoters.df, raw.patski.x )
+  atac.promoters = overlap_ATAC_ranges( promoters.df, raw.patski.x )
 #this promoters have UC ID which is weird, we can make a conversion table to get gene symbols and mrnaID
 #> mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -D mm10 -e 'select kgID,mRNA,geneSymbol from kgXref' | sed "s/'/\'/;s/\t/,/g;s/^//;s/$//;s/\n//g" > mm10_geneSymbols.txt
 #then read (needs a couple of manuall edits cause some entries have multiple names)
 gene.ids=read.table("mm10_geneSymbols.txt",sep=",",header=T)
+#load the genome:
+library(BSgenome.Mmusculus.UCSC.mm10)
+chrx<-unmasked(Mmusculus$chrX)
+#get sequences for top promoters
+promoter.seqs = Views(chrx,start = atac.promoters$start,end = atac.promoters$end)
+library(stringi)
+#add the sequences for all the promoters
+atac.promoters$sequence = as.character(promoter.seqs)
+#get reverse complement
+for(i in 1:dim(atac.promoters)[1]){
+  if(atac.promoters[i,]$strand=="-"){
+    atac.promoters[i,]$sequence = rc(atac.promoters[i,]$sequence)
+  }
+}
 
-
-
-tx_seqs1<-extractTranscriptSeqs(Mmusculus,TxDb.Mmusculus.UCSC.mm10.knownGene,use.names = T)
+# alternative
+# >> tx_seqs1<-extractTranscriptSeqs(Mmusculus,TxDb.Mmusculus.UCSC.mm10.knownGene,use.names = T)
