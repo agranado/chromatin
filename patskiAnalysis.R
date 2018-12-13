@@ -13,10 +13,10 @@ library(readxl)
 patski= import.bed("patskiWT.allelicATAC.dScore.minCov_5.bedgraph.gz")
 
 
-#Distribution of region size
-x11()
-hist(log(end(ranges(patski))-start(ranges(patski))),
-     main="Region size, all chromosomes",xlab="Region size (log bp)")
+  #Distribution of region size
+  x11()
+  hist(log10(end(ranges(patski))-start(ranges(patski))),
+       main="Region size, all chromosomes",xlab="Region size (log bp)")
 
 #Most regions seem to be less than 1kb
 #median = 669
