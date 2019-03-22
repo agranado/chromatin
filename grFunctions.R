@@ -207,7 +207,7 @@ overlap_ATAC_ranges<-function(target.regions,ATACpeaks){
 #  score:  (sum of individual scores for peaks within the promoter)
 #  peaks:  number of peaks ATAC peaks found within the region
   atac.promoters<-promoters.df[promoters.df$peaks>0,]
-  atac.promoters<-atac.promoters[order(atac.promoters$score,decreasing=T),]
+  atac.promoters<-atac.promoters[base::order(atac.promoters$sum.score,decreasing=T),]
   return(atac.promoters)
 }
 
